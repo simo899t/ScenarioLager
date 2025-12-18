@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Transaction History{% endblock %}
+
+{% block content %}
+<h1>Transaction History</h1>
+
+{% if transactions.items %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Date & Time</th>
+            <th>Product</th>
+            <th>SKU</th>
+            <th>Type</th>
+            <th>Quantity</th>
+            <th>User</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for trans in transactions.items %}
+        <tr>
+            <td>{{ trans.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ trans.product.name }}</td>
+            <td>{{ trans.product.sku }}</td>
+            <td>
+                <span class="badge badge-{{ 'success' if trans.transaction_type == 'in' else 'danger' }}">
+                    {{ 'IN' if trans.transaction_type == 'in' else 'OUT' }}
+                </span>
+            </td>
+            <td>{{ trans.quantity }} {{ trans.product.unit }}</td>
+            <td>{{ trans.user.username }}</td>
+            <td>{{ trans.notes or '-' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="pagination">
+    {% if transactions.has_prev %}
+    <a href="{{ url_for('main.transactions', page=transactions.prev_num) }}" class="btn">← Previous</a>
+    {% endif %}
+    
+    <span>Page {{ transactions.page }} of {{ transactions.pages }}</span>
+    
+    {% if transactions.has_next %}
+    <a href="{{ url_for('main.transactions', page=transactions.next_num) }}" class="btn">Next →</a>
+    {% endif %}
+</div>
+{% else %}
+<p>No transactions recorded yet.</p>
+{% endif %}
+{% endblock %}

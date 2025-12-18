@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout History{% endblock %}
+
+{% block content %}
+<h1>Checkout History</h1>
+
+{% if checkouts.items %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Borrower</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Status</th>
+            <th>Checked Out</th>
+            <th>Returned</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for checkout in checkouts.items %}
+        <tr>
+            <td>
+                <a href="{{ url_for('main.product_info', id=checkout.product.id) }}">
+                    {{ checkout.product.name }}
+                </a>
+            </td>
+            <td>{{ checkout.borrower_name }}</td>
+            <td>{{ checkout.from_date.strftime('%d/%m/%Y %H:%M') }}</td>
+            <td>{{ checkout.to_date.strftime('%d/%m/%Y %H:%M') }}</td>
+            <td>
+                <span class="badge badge-{{ 'success' if checkout.status == 'returned' else 'warning' }}">
+                    {{ checkout.status.title() }}
+                </span>
+            </td>
+            <td>{{ checkout.checked_out_at.strftime('%d/%m/%Y %H:%M') }}</td>
+            <td>{{ checkout.returned_at.strftime('%d/%m/%Y %H:%M') if checkout.returned_at else '-' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="pagination">
+    {% if checkouts.has_prev %}
+    <a href="{{ url_for('main.checkouts', page=checkouts.prev_num) }}" class="btn">← Previous</a>
+    {% endif %}
+    
+    <span>Page {{ checkouts.page }} of {{ checkouts.pages }}</span>
+    
+    {% if checkouts.has_next %}
+    <a href="{{ url_for('main.checkouts', page=checkouts.next_num) }}" class="btn">Next →</a>
+    {% endif %}
+</div>
+{% else %}
+<p>No checkout history yet.</p>
+{% endif %}
+{% endblock %}

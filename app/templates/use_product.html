@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Use Item{% endblock %}
+
+{% block content %}
+<h1>Check Out Item</h1>
+
+<div class="product-details">
+    <h2>{{ product.name }}</h2>
+    <p><strong>ID:</strong> {{ product.sku }}</p>
+    <p><strong>Location:</strong> {{ product.location or '-' }}</p>
+</div>
+
+<form method="POST" action="{{ url_for('main.use_product', id=product.id) }}" class="form">
+    <div class="form-group">
+        <label for="borrower_name">Your Name *</label>
+        <input type="text" id="borrower_name" name="borrower_name" required autofocus>
+    </div>
+    
+    <div class="form-row">
+        <div class="form-group">
+            <label for="from_date">From *</label>
+            <input type="datetime-local" id="from_date" name="from_date" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="to_date">To *</label>
+            <input type="datetime-local" id="to_date" name="to_date" required>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label for="notes">Notes (optional)</label>
+        <textarea id="notes" name="notes" rows="3" placeholder="Purpose, project, or any additional information"></textarea>
+    </div>
+    
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Check Out</button>
+        <a href="{{ url_for('main.inventory') }}" class="btn">Cancel</a>
+    </div>
+</form>
+
+<script>
+    // Set default dates: from now, to 7 days from now
+    const now = new Date();
+    const later = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    
+    document.getElementById('from_date').value = now.toISOString().slice(0, 16);
+    document.getElementById('to_date').value = later.toISOString().slice(0, 16);
+</script>
+{% endblock %}
