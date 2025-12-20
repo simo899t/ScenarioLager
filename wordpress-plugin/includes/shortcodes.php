@@ -39,38 +39,37 @@ function scenario_lager_frontend_shortcode() {
         return scenario_lager_login_form();
     }
     
-    // Handle actions
+    // Get base URL
+    $current_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+    $base_url = strtok($current_url, '?');
+    
+    // Check for session message
+    $success_message = '';
+    if (isset($_SESSION['sl_message'])) {
+        $msg = $_SESSION['sl_message'];
+        $alert_class = $msg['type'] === 'success' ? 'sl-alert-success' : 'sl-alert-danger';
+        $success_message = '<div class="sl-alert ' . $alert_class . '">' . esc_html($msg['text']) . '</div>';
+        unset($_SESSION['sl_message']);
+    }
+    
+    // Handle other actions (checkout, return)
     if (isset($_POST['sl_action'])) {
         if (!isset($_POST['sl_nonce']) || !wp_verify_nonce($_POST['sl_nonce'], 'sl_action')) {
             return '<div class="sl-alert sl-alert-danger">Security check failed</div>';
         }
         
-        if ($_POST['sl_action'] === 'add' && isset($_POST['sku'])) {
-            global $wpdb;
-            $wpdb->insert(
-                $wpdb->prefix . 'sl_products',
-                array(
-                    'sku' => sanitize_text_field($_POST['sku']),
-                    'name' => sanitize_text_field($_POST['name']),
-                    'description' => sanitize_textarea_field($_POST['description']),
-                    'location' => sanitize_text_field($_POST['location']),
-                    'is_available' => 1
-                )
-            );
-            wp_redirect(remove_query_arg(['sl_page', 'id'], get_permalink()));
-            exit;
-        } elseif ($_POST['sl_action'] === 'checkout' && isset($_POST['product_id'])) {
+        if ($_POST['sl_action'] === 'checkout' && isset($_POST['product_id'])) {
             scenario_lager_checkout_product(
                 $_POST['product_id'],
                 sanitize_text_field($_POST['borrower_name']),
                 sanitize_text_field($_POST['from_date']),
                 sanitize_text_field($_POST['to_date'])
             );
-            wp_redirect(add_query_arg(['sl_page' => 'info', 'id' => $_POST['product_id']], get_permalink()));
+            wp_redirect($base_url . '?sl_page=info&id=' . $_POST['product_id']);
             exit;
         } elseif ($_POST['sl_action'] === 'return' && isset($_POST['product_id'])) {
             scenario_lager_return_product($_POST['product_id']);
-            wp_redirect(remove_query_arg(['sl_page', 'id'], get_permalink()));
+            wp_redirect($base_url);
             exit;
         }
     }
@@ -84,6 +83,11 @@ function scenario_lager_frontend_shortcode() {
     // Render navigation and content
     echo '<div class="scenario-lager-frontend">';
     scenario_lager_render_nav($page);
+    
+    // Show success message if set
+    if (!empty($success_message)) {
+        echo $success_message;
+    }
     
     switch ($page) {
         case 'add':
@@ -111,23 +115,25 @@ function scenario_lager_frontend_shortcode() {
 function scenario_lager_login_form($error = '') {
     ob_start();
     ?>
-    <div class="sl-login-container">
-        <div class="sl-login-box">
-            <h1>Scenari<span class="red-o">o</span> Lager</h1>
-            <?php if ($error): ?>
-                <div class="sl-alert sl-alert-danger"><?php echo esc_html($error); ?></div>
-            <?php endif; ?>
-            <form method="post">
-                <div class="sl-form-group">
-                    <label>Username</label>
-                    <input type="text" name="username" required>
-                </div>
-                <div class="sl-form-group">
-                    <label>Password</label>
-                    <input type="password" name="password" required>
-                </div>
-                <button type="submit" name="sl_login" class="sl-btn sl-btn-primary sl-btn-full">Login</button>
-            </form>
+    <div class="scenario-lager-frontend">
+        <div class="sl-login-container">
+            <div class="sl-login-box">
+                <h1>Scenari<span class="red-o">o</span> Lager</h1>
+                <?php if ($error): ?>
+                    <div class="sl-alert sl-alert-danger"><?php echo esc_html($error); ?></div>
+                <?php endif; ?>
+                <form method="post">
+                    <div class="sl-form-group">
+                        <label>Username</label>
+                        <input type="text" name="username" required>
+                    </div>
+                    <div class="sl-form-group">
+                        <label>Password</label>
+                        <input type="password" name="password" required>
+                    </div>
+                    <button type="submit" name="sl_login" class="sl-btn sl-btn-primary sl-btn-full">Login</button>
+                </form>
+            </div>
         </div>
     </div>
     <?php
@@ -142,7 +148,6 @@ function scenario_lager_render_nav($current_page) {
             <div class="sl-nav-brand">Scenari<span class="red-o">o</span> Lager</div>
             <ul class="sl-nav-menu">
                 <li><a href="<?php echo $base_url; ?>" class="<?php echo $current_page === 'inventory' ? 'active' : ''; ?>">Inventory</a></li>
-                <li><a href="<?php echo add_query_arg('sl_page', 'add', $base_url); ?>" class="<?php echo $current_page === 'add' ? 'active' : ''; ?>">Add Item</a></li>
                 <li><a href="<?php echo add_query_arg('sl_page', 'history', $base_url); ?>" class="<?php echo $current_page === 'history' ? 'active' : ''; ?>">History</a></li>
                 <li><a href="<?php echo add_query_arg('sl_logout', '1', $base_url); ?>" class="logout">Logout</a></li>
             </ul>
@@ -160,7 +165,7 @@ function scenario_lager_render_inventory_page() {
     <div class="sl-container">
         <div class="sl-page-header">
             <h1>Inventory</h1>
-            <a href="<?php echo add_query_arg('sl_page', 'add', $base_url); ?>" class="sl-btn sl-btn-primary">Add New</a>
+            <a href="<?php echo add_query_arg('sl_page', 'add', $base_url); ?>" class="sl-btn sl-btn-primary">Add Item</a>
         </div>
         
         <div class="sl-search-box">
@@ -410,7 +415,9 @@ function scenario_lager_render_info_page($product_id) {
 }
 
 function scenario_lager_render_add_page() {
-    $base_url = get_permalink();
+    // Get current URL without query params
+    $current_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $base_url = strtok($current_url, '?');
     ?>
     <div class="sl-container">
         <div class="sl-page-header">
