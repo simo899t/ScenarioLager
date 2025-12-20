@@ -3,7 +3,7 @@
  * Plugin Name: Scenario Lager
  * Plugin URI: http://multipartner.dk/lager
  * Description: Equipment checkout and storage management system for Scenario
- * Version: 2.0.1
+ * Version: 2.0.2
  * Author: Scenario
  * License: GPL v2 or later
  * Text Domain: scenario-lager
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('SCENARIO_LAGER_VERSION', '2.0.1');
+define('SCENARIO_LAGER_VERSION', '2.0.2');
 define('SCENARIO_LAGER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SCENARIO_LAGER_PLUGIN_URL', plugin_dir_url(__FILE__));
 

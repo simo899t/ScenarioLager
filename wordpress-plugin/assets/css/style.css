@@ -33,15 +33,6 @@ body.page {
     background-color: #f5f5f7;
     min-height: 100vh;
     line-height: 1.6;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100vw;
-    height: 100vh;
-    overflow-y: auto;
-    z-index: 999999;
 }
 
 .scenario-lager-wrap {
@@ -75,16 +66,9 @@ body.page {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
     background-color: #f5f5f7;
     padding: 2rem;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 999999;
 }
 
 .sl-login-box {
