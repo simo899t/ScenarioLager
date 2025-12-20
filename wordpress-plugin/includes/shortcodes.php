@@ -68,10 +68,24 @@ function scenario_lager_frontend_shortcode() {
                     'notes' => sanitize_textarea_field($_POST['notes'])
                 )
             );
-            wp_redirect($base_url . '?sl_page=info&id=' . $_POST['product_id']);
+            wp_redirect($base_url);
             exit;
         } elseif ($_POST['sl_action'] === 'return' && isset($_POST['product_id'])) {
             scenario_lager_return_product($_POST['product_id']);
+            wp_redirect($base_url);
+            exit;
+        } elseif ($_POST['sl_action'] === 'delete' && isset($_POST['product_id'])) {
+            global $wpdb;
+            // Delete all checkouts for this product
+            $wpdb->delete(
+                $wpdb->prefix . 'sl_checkouts',
+                array('product_id' => $_POST['product_id'])
+            );
+            // Delete the product
+            $wpdb->delete(
+                $wpdb->prefix . 'sl_products',
+                array('id' => $_POST['product_id'])
+            );
             wp_redirect($base_url);
             exit;
         }
@@ -332,7 +346,15 @@ function scenario_lager_render_info_page($product_id) {
     <div class="sl-container">
         <div class="sl-page-header">
             <h1>Item Information</h1>
-            <a href="<?php echo $base_url; ?>" class="sl-btn">Back to Inventory</a>
+            <div>
+                <a href="<?php echo $base_url; ?>" class="sl-btn">Back to Inventory</a>
+                <form method="post" style="display:inline;">
+                    <?php wp_nonce_field('sl_action', 'sl_nonce'); ?>
+                    <input type="hidden" name="sl_action" value="delete">
+                    <input type="hidden" name="product_id" value="<?php echo $product->id; ?>">
+                    <button type="submit" class="sl-btn sl-btn-danger" onclick="return confirm('Are you sure you want to delete this item? This will also delete all checkout history.')">Delete Item</button>
+                </form>
+            </div>
         </div>
         
         <div class="sl-info-card">
