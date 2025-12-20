@@ -61,9 +61,12 @@ function scenario_lager_frontend_shortcode() {
         if ($_POST['sl_action'] === 'checkout' && isset($_POST['product_id'])) {
             scenario_lager_checkout_product(
                 $_POST['product_id'],
-                sanitize_text_field($_POST['borrower_name']),
-                sanitize_text_field($_POST['from_date']),
-                sanitize_text_field($_POST['to_date'])
+                array(
+                    'borrower_name' => sanitize_text_field($_POST['borrower_name']),
+                    'from_date' => sanitize_text_field($_POST['from_date']),
+                    'to_date' => sanitize_text_field($_POST['to_date']),
+                    'notes' => sanitize_textarea_field($_POST['notes'])
+                )
             );
             wp_redirect($base_url . '?sl_page=info&id=' . $_POST['product_id']);
             exit;
@@ -269,8 +272,13 @@ function scenario_lager_render_checkout_page($product_id) {
                 <input type="hidden" name="product_id" value="<?php echo $product->id; ?>">
                 
                 <div class="sl-form-group">
-                    <label>Borrower Name *</label>
+                    <label>Users Name *</label>
                     <input type="text" name="borrower_name" required>
+                </div>
+                
+                <div class="sl-form-group">
+                    <label>Description (what is it being used for?)</label>
+                    <textarea name="notes" rows="3"></textarea>
                 </div>
                 
                 <div class="sl-form-row">
@@ -363,10 +371,13 @@ function scenario_lager_render_info_page($product_id) {
             <div class="sl-active-checkout">
                 <h3>Current Checkout</h3>
                 <div class="sl-checkout-details">
-                    <p><strong>Borrower:</strong> <?php echo esc_html($current_checkout->borrower_name); ?></p>
+                    <p><strong>Users Name:</strong> <?php echo esc_html($current_checkout->borrower_name); ?></p>
                     <p><strong>From:</strong> <?php echo date('d/m/Y H:i', strtotime($current_checkout->from_date)); ?></p>
                     <p><strong>To:</strong> <?php echo date('d/m/Y H:i', strtotime($current_checkout->to_date)); ?></p>
                     <p><strong>Checked out:</strong> <?php echo date('d/m/Y H:i', strtotime($current_checkout->created_at)); ?></p>
+                    <?php if (!empty($current_checkout->notes)): ?>
+                        <p><strong>Description:</strong> <?php echo nl2br(esc_html($current_checkout->notes)); ?></p>
+                    <?php endif; ?>
                 </div>
                 <form method="post" style="margin-top:1rem;">
                     <?php wp_nonce_field('sl_action', 'sl_nonce'); ?>
@@ -383,7 +394,7 @@ function scenario_lager_render_info_page($product_id) {
                 <table class="sl-table">
                     <thead>
                         <tr>
-                            <th>Borrower</th>
+                            <th>Users Name</th>
                             <th>From</th>
                             <th>To</th>
                             <th>Checked Out</th>
@@ -492,7 +503,7 @@ function scenario_lager_render_history_page() {
         <div class="sl-search-box">
             <form method="get">
                 <input type="hidden" name="sl_page" value="history">
-                <input type="text" name="search" value="<?php echo esc_attr($search); ?>" placeholder="Search by item name, ID, or borrower...">
+                <input type="text" name="search" value="<?php echo esc_attr($search); ?>" placeholder="Search by item name, ID, or users name...">
                 <button type="submit" class="sl-btn sl-btn-primary">Search</button>
                 <?php if ($search): ?>
                     <a href="<?php echo add_query_arg('sl_page', 'history', $base_url); ?>" class="sl-btn">Clear</a>
@@ -506,7 +517,7 @@ function scenario_lager_render_history_page() {
                     <tr>
                         <th>Item ID</th>
                         <th>Item Name</th>
-                        <th>Borrower</th>
+                        <th>Users Name</th>
                         <th>From</th>
                         <th>To</th>
                         <th>Checked Out</th>
