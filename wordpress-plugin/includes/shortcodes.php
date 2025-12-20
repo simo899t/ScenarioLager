@@ -160,6 +160,7 @@ function scenario_lager_render_inventory_page() {
     <div class="sl-container">
         <div class="sl-page-header">
             <h1>Inventory</h1>
+            <a href="<?php echo add_query_arg('sl_page', 'add', $base_url); ?>" class="sl-btn sl-btn-primary">Add New</a>
         </div>
         
         <div class="sl-search-box">

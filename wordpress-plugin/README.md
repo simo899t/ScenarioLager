@@ -1,10 +1,10 @@
 # Scenario Lager - WordPress Plugin
 
-Equipment checkout and storage management system for Scenario.
+Equipment checkout and storage management system for TeaterScenario.
 
 ## Installation
 
-1. Upload `scenario-lager-plugin-v5.zip` to WordPress via Plugins → Add New → Upload Plugin
+1. Upload `scenario-lager-plugin-v5.zip` to WordPress via Plugins
 2. Activate the plugin
 3. The plugin will automatically create the necessary database tables
 
@@ -16,10 +16,9 @@ Equipment checkout and storage management system for Scenario.
 4. Publish the page
 
 ## Usage
-
 Visit `http://multipartner.dk/lager` (or your chosen URL) to access the warehouse system.
 
-**Login credentials:**
+**Initial Login credentials:**
 - Username: `admin`
 - Password: `admin123`
 
@@ -38,21 +37,6 @@ After logging in, you can:
 - **Item History**: Complete history of all checkouts and returns
 - **Responsive Design**: Clean, modern interface matching the Python version
 - **"Scenario" Branding**: Red "o" in logo
-
-## Database Tables
-
-The plugin creates two tables:
-- `wp_sl_products`: Stores inventory items
-- `wp_sl_checkouts`: Stores checkout/return history
-
-## Adding Initial Data
-
-To add test items, you can insert directly into the database via phpMyAdmin:
-
-```sql
-INSERT INTO wp_sl_products (sku, name, description, location, is_available) 
-VALUES ('TEST-001', 'Test Equipment', 'Test description', 'Storage Room A', 1);
-```
 
 ## Security Note
 

@@ -1,16 +1,30 @@
-/* Full Page Overrides - Remove WordPress Content Padding */
-body.page .entry-content,
-body.page .site-content,
-body.page article {
-    padding: 0 !important;
-    margin: 0 !important;
+/* Complete WordPress Theme Override */
+body.page-template-default .entry-header,
+body.page .entry-title,
+body.page .page-header,
+.site-header,
+.site-footer,
+body.page .entry-content > *:not(.scenario-lager-frontend) {
+    display: none !important;
 }
 
-body.page .scenario-lager-frontend {
-    margin-left: calc(-50vw + 50%) !important;
-    margin-right: calc(-50vw + 50%) !important;
-    max-width: 100vw !important;
-    width: 100vw !important;
+body.page,
+body.page #page,
+body.page #content,
+body.page .site,
+body.page .site-content,
+body.page .content-area,
+body.page main,
+body.page article,
+body.page .entry-content {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+body.page {
+    overflow-x: hidden;
 }
 
 /* Main Container */
@@ -19,14 +33,22 @@ body.page .scenario-lager-frontend {
     background-color: #f5f5f7;
     min-height: 100vh;
     line-height: 1.6;
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 999999;
 }
 
 .scenario-lager-wrap {
     background-color: #f5f5f7;
     min-height: calc(100vh - 32px);
     padding: 0;
-    margin: 0 -20px 0 0;
+    margin: 0;
 }
 
 .scenario-lager-wrap h1 {
@@ -53,9 +75,16 @@ body.page .scenario-lager-frontend {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    width: 100vw;
+    height: 100vh;
     background-color: #f5f5f7;
     padding: 2rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999999;
 }
 
 .sl-login-box {
@@ -106,22 +135,23 @@ body.page .scenario-lager-frontend {
     padding: 0;
 }
 
-.sl-nav-menu a {
+.sl-nav-menu li a {
     color: #1d1d1f;
     text-decoration: none;
     transition: color 0.2s;
+    font-size: 1rem;
 }
 
-.sl-nav-menu a:hover {
+.sl-nav-menu li a:hover {
     color: #0071e3;
 }
 
-.sl-nav-menu a.active {
+.sl-nav-menu li a.active {
     color: #0071e3;
     font-weight: 500;
 }
 
-.sl-nav-menu a.logout {
+.sl-nav-menu li a.logout {
     color: #d32f2f;
 }
 
