@@ -45,20 +45,24 @@ function scenario_lager_create_tables() {
     dbDelta($sql_checkouts);
 }
 
-// Get all products
+// Get all products with checkout info
 function scenario_lager_get_products($search = '') {
     global $wpdb;
-    $table = $wpdb->prefix . 'sl_products';
+    $table_products = $wpdb->prefix . 'sl_products';
+    $table_checkouts = $wpdb->prefix . 'sl_checkouts';
+    
+    $query = "SELECT p.*, c.borrower_name, c.from_date, c.to_date, c.checked_out_at 
+              FROM $table_products p 
+              LEFT JOIN $table_checkouts c ON p.id = c.product_id AND c.status = 'active'";
     
     if (!empty($search)) {
         $search = '%' . $wpdb->esc_like($search) . '%';
-        return $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM $table WHERE name LIKE %s OR sku LIKE %s ORDER BY name",
-            $search, $search
-        ));
+        $query .= $wpdb->prepare(" WHERE p.name LIKE %s OR p.sku LIKE %s", $search, $search);
     }
     
-    return $wpdb->get_results("SELECT * FROM $table ORDER BY name");
+    $query .= " ORDER BY p.name";
+    
+    return $wpdb->get_results($query);
 }
 
 // Get single product

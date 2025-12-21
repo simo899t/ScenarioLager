@@ -222,6 +222,12 @@ function scenario_lager_render_inventory_page() {
                                         <span class="sl-badge sl-badge-success">Available</span>
                                     <?php else: ?>
                                         <span class="sl-badge sl-badge-warning">In Use</span>
+                                        <?php if (!empty($product->borrower_name)): ?>
+                                            <div style="font-size: 0.875rem; color: #666; margin-top: 0.25rem;">
+                                                <?php echo esc_html($product->borrower_name); ?><br>
+                                                Until: <?php echo date('d/m/Y H:i', strtotime($product->to_date)); ?>
+                                            </div>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </td>
                                 <td>
@@ -330,13 +336,13 @@ function scenario_lager_render_info_page($product_id) {
     
     // Get current checkout
     $current_checkout = $wpdb->get_row($wpdb->prepare(
-        "SELECT * FROM {$wpdb->prefix}sl_checkouts WHERE product_id = %d AND status = 'active' ORDER BY created_at DESC LIMIT 1",
+        "SELECT * FROM {$wpdb->prefix}sl_checkouts WHERE product_id = %d AND status = 'active' ORDER BY checked_out_at DESC LIMIT 1",
         $product_id
     ));
     
     // Get history
     $history = $wpdb->get_results($wpdb->prepare(
-        "SELECT * FROM {$wpdb->prefix}sl_checkouts WHERE product_id = %d ORDER BY created_at DESC",
+        "SELECT * FROM {$wpdb->prefix}sl_checkouts WHERE product_id = %d ORDER BY checked_out_at DESC",
         $product_id
     ));
     
@@ -396,7 +402,7 @@ function scenario_lager_render_info_page($product_id) {
                     <p><strong>Users Name:</strong> <?php echo esc_html($current_checkout->borrower_name); ?></p>
                     <p><strong>From:</strong> <?php echo date('d/m/Y H:i', strtotime($current_checkout->from_date)); ?></p>
                     <p><strong>To:</strong> <?php echo date('d/m/Y H:i', strtotime($current_checkout->to_date)); ?></p>
-                    <p><strong>Checked out:</strong> <?php echo date('d/m/Y H:i', strtotime($current_checkout->created_at)); ?></p>
+                    <p><strong>Checked out:</strong> <?php echo date('d/m/Y H:i', strtotime($current_checkout->checked_out_at)); ?></p>
                     <?php if (!empty($current_checkout->notes)): ?>
                         <p><strong>Description:</strong> <?php echo nl2br(esc_html($current_checkout->notes)); ?></p>
                     <?php endif; ?>
@@ -429,7 +435,7 @@ function scenario_lager_render_info_page($product_id) {
                                 <td><?php echo esc_html($checkout->borrower_name); ?></td>
                                 <td><?php echo date('d/m/Y H:i', strtotime($checkout->from_date)); ?></td>
                                 <td><?php echo date('d/m/Y H:i', strtotime($checkout->to_date)); ?></td>
-                                <td><?php echo date('d/m/Y H:i', strtotime($checkout->created_at)); ?></td>
+                                <td><?php echo date('d/m/Y H:i', strtotime($checkout->checked_out_at)); ?></td>
                                 <td>
                                     <?php if ($checkout->status === 'active'): ?>
                                         <span class="sl-badge sl-badge-warning">Active</span>
@@ -512,7 +518,7 @@ function scenario_lager_render_history_page() {
         );
     }
     
-    $query .= " ORDER BY c.created_at DESC";
+    $query .= " ORDER BY c.checked_out_at DESC";
     $history = $wpdb->get_results($query);
     
     $base_url = get_permalink();
@@ -520,6 +526,7 @@ function scenario_lager_render_history_page() {
     <div class="sl-container">
         <div class="sl-page-header">
             <h1>Checkout History</h1>
+            <a href="<?php echo $base_url; ?>" class="sl-btn">Back to Inventory</a>
         </div>
         
         <div class="sl-search-box">
@@ -559,7 +566,7 @@ function scenario_lager_render_history_page() {
                                 <td><?php echo esc_html($checkout->borrower_name); ?></td>
                                 <td><?php echo date('d/m/Y H:i', strtotime($checkout->from_date)); ?></td>
                                 <td><?php echo date('d/m/Y H:i', strtotime($checkout->to_date)); ?></td>
-                                <td><?php echo date('d/m/Y H:i', strtotime($checkout->created_at)); ?></td>
+                                <td><?php echo date('d/m/Y H:i', strtotime($checkout->checked_out_at)); ?></td>
                                 <td>
                                     <?php if ($checkout->status === 'active'): ?>
                                         <span class="sl-badge sl-badge-warning">Active</span>
