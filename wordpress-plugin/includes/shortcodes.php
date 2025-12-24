@@ -88,6 +88,21 @@ function scenario_lager_frontend_shortcode() {
             );
             wp_redirect($base_url);
             exit;
+        } elseif ($_POST['sl_action'] === 'update' && isset($_POST['product_id'])) {
+            global $wpdb;
+            $wpdb->update(
+                $wpdb->prefix . 'sl_products',
+                array(
+                    'sku' => sanitize_text_field($_POST['sku']),
+                    'name' => sanitize_text_field($_POST['name']),
+                    'location' => sanitize_text_field($_POST['location']),
+                    'description' => sanitize_textarea_field($_POST['description'])
+                ),
+                array('id' => $_POST['product_id'])
+            );
+            $_SESSION['sl_message'] = array('type' => 'success', 'text' => 'Item updated successfully!');
+            wp_redirect(add_query_arg(['sl_page' => 'info', 'id' => $_POST['product_id']], $base_url));
+            exit;
         }
     }
     
@@ -109,6 +124,9 @@ function scenario_lager_frontend_shortcode() {
     switch ($page) {
         case 'add':
             scenario_lager_render_add_page();
+            break;
+        case 'edit':
+            scenario_lager_render_edit_page($product_id);
             break;
         case 'checkout':
             scenario_lager_render_checkout_page($product_id);
@@ -232,6 +250,7 @@ function scenario_lager_render_inventory_page() {
                                 </td>
                                 <td>
                                     <a href="<?php echo add_query_arg(['sl_page' => 'info', 'id' => $product->id], $base_url); ?>" class="sl-btn sl-btn-sm">Info</a>
+                                    <a href="<?php echo add_query_arg(['sl_page' => 'edit', 'id' => $product->id], $base_url); ?>" class="sl-btn sl-btn-sm">Edit</a>
                                     <?php if ($product->is_available): ?>
                                         <a href="<?php echo add_query_arg(['sl_page' => 'checkout', 'id' => $product->id], $base_url); ?>" class="sl-btn sl-btn-primary sl-btn-sm">Use</a>
                                     <?php else: ?>
@@ -354,6 +373,7 @@ function scenario_lager_render_info_page($product_id) {
             <h1>Item Information</h1>
             <div>
                 <a href="<?php echo $base_url; ?>" class="sl-btn">Back to Inventory</a>
+                <a href="<?php echo add_query_arg(['sl_page' => 'edit', 'id' => $product->id], $base_url); ?>" class="sl-btn sl-btn-primary">Edit Item</a>
                 <form method="post" style="display:inline;">
                     <?php wp_nonce_field('sl_action', 'sl_nonce'); ?>
                     <input type="hidden" name="sl_action" value="delete">
@@ -449,6 +469,62 @@ function scenario_lager_render_info_page($product_id) {
                 </table>
             </div>
         <?php endif; ?>
+    </div>
+    <?php
+}
+
+function scenario_lager_render_edit_page($product_id) {
+    global $wpdb;
+    $product = $wpdb->get_row($wpdb->prepare(
+        "SELECT * FROM {$wpdb->prefix}sl_products WHERE id = %d",
+        $product_id
+    ));
+    
+    if (!$product) {
+        echo '<div class="sl-alert sl-alert-danger">Product not found</div>';
+        return;
+    }
+    
+    $base_url = get_permalink();
+    ?>
+    <div class="sl-container">
+        <div class="sl-page-header">
+            <h1>Edit Item</h1>
+            <a href="<?php echo add_query_arg(['sl_page' => 'info', 'id' => $product->id], $base_url); ?>" class="sl-btn">Cancel</a>
+        </div>
+        
+        <div class="sl-section">
+            <form method="post" class="sl-form">
+                <?php wp_nonce_field('sl_action', 'sl_nonce'); ?>
+                <input type="hidden" name="sl_action" value="update">
+                <input type="hidden" name="product_id" value="<?php echo $product->id; ?>">
+                
+                <div class="sl-form-group">
+                    <label>ID (SKU) *</label>
+                    <input type="text" name="sku" value="<?php echo esc_attr($product->sku); ?>" required>
+                </div>
+                
+                <div class="sl-form-group">
+                    <label>Name *</label>
+                    <input type="text" name="name" value="<?php echo esc_attr($product->name); ?>" required>
+                </div>
+                
+                <div class="sl-form-group">
+                    <label>Location</label>
+                    <input type="text" name="location" value="<?php echo esc_attr($product->location); ?>">
+                </div>
+                
+                <div class="sl-form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="5"><?php echo esc_textarea($product->description); ?></textarea>
+                </div>
+                
+                <div class="sl-form-actions">
+                    <button type="submit" class="sl-btn sl-btn-primary">Update Item</button>
+                    <a href="<?php echo add_query_arg(['sl_page' => 'info', 'id' => $product->id], $base_url); ?>" class="sl-btn">Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
     <?php
 }
